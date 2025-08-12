@@ -18,8 +18,9 @@ import {
   Bell,
   Search,
   User,
-  Settings
+  Settings as SettingsIcon
 } from "lucide-react";
+import { Settings } from "@/components/settings/settings";
 
 interface NavigationItem {
   id: string;
@@ -36,6 +37,7 @@ const navigationItems: NavigationItem[] = [
   { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
   { id: "crm", label: "CRM", icon: MessageSquare, component: CRM },
   { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
+    { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
 ];
 
 const Index = () => {
@@ -91,8 +93,12 @@ const Index = () => {
 
           {/* Settings */}
           <div className="mt-8 pt-4 border-t border-border">
-            <Button variant="ghost" className="w-full justify-start">
-              <Settings className="mr-3 h-4 w-4" />
+            <Button 
+              variant={activeSection === "settings" ? "iron" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveSection("settings")}
+            >
+              <SettingsIcon className="mr-3 h-4 w-4" />
               Configuración
             </Button>
           </div>

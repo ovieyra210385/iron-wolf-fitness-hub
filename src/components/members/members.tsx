@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabaseClient";
 import { 
   Users, 
   UserPlus, 
@@ -16,52 +19,56 @@ import {
 } from "lucide-react";
 
 export function Members() {
-  const members = [
-    {
-      id: 1,
-      name: "Ana García Rodríguez",
-      email: "ana.garcia@email.com",
-      phone: "+52 55 1234-5678",
-      membership: "Premium Anual",
-      status: "Activo",
-      expires: "2024-12-31",
-      visits: 45,
-      lastVisit: "Hoy, 09:30"
-    },
-    {
-      id: 2,
-      name: "Carlos López Hernández",
-      email: "carlos.lopez@email.com",
-      phone: "+52 55 2345-6789",
-      membership: "Básico Mensual",
-      status: "Activo",
-      expires: "2024-09-15",
-      visits: 12,
-      lastVisit: "Ayer, 18:45"
-    },
-    {
-      id: 3,
-      name: "María Santos Díaz",
-      email: "maria.santos@email.com",
-      phone: "+52 55 3456-7890",
-      membership: "Premium Mensual",
-      status: "Suspendido",
-      expires: "2024-08-20",
-      visits: 28,
-      lastVisit: "Hace 3 días"
-    },
-    {
-      id: 4,
-      name: "Roberto Ruiz Martín",
-      email: "roberto.ruiz@email.com",
-      phone: "+52 55 4567-8901",
-      membership: "Pago por Visita",
-      status: "Activo",
-      expires: "-",
-      visits: 8,
-      lastVisit: "Hace 2 horas"
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    membership: "Básico Mensual",
+    status: "Activo",
+    expires: "",
+    visits: 0,
+    lastVisit: ""
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from("members").select("*").order("id", { ascending: false });
+      if (!error) setMembers(data || []);
+      setLoading(false);
+    };
+    fetchMembers();
+  }, []);
+
+  const handleInput = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAddMember = async () => {
+    setSaving(true);
+    const { error } = await supabase.from("members").insert([form]);
+    if (!error) {
+      setShowModal(false);
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        membership: "Básico Mensual",
+        status: "Activo",
+        expires: "",
+        visits: 0,
+        lastVisit: ""
+      });
+      // Refresca la lista
+      const { data } = await supabase.from("members").select("*").order("id", { ascending: false });
+      setMembers(data || []);
     }
-  ];
+    setSaving(false);
+  };
 
   const membershipPlans = [
     { name: "Básico Mensual", price: "$599", features: ["Acceso al gym", "Clases grupales básicas"] },
@@ -87,7 +94,7 @@ export function Members() {
           <h1 className="text-3xl font-heading font-bold text-foreground">Gestión de Socios</h1>
           <p className="text-muted-foreground">Administra membresías, altas, bajas y renovaciones</p>
         </div>
-        <Button variant="iron" size="lg">
+        <Button variant="iron" size="lg" onClick={() => setShowModal(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Nuevo Socio
         </Button>
@@ -163,39 +170,45 @@ export function Members() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {members.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold">
-                      {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-card-foreground">{member.name}</h3>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span className="flex items-center">
-                          <Mail className="h-3 w-3 mr-1" />
-                          {member.email}
-                        </span>
-                        <span className="flex items-center">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {member.phone}
-                        </span>
+              {loading ? (
+                <div className="text-center text-muted-foreground">Cargando socios...</div>
+              ) : members.length === 0 ? (
+                <div className="text-center text-muted-foreground">No hay socios registrados.</div>
+              ) : (
+                members.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-12 w-12 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold">
+                        {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-card-foreground">{member.name}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span className="flex items-center">
+                            <Mail className="h-3 w-3 mr-1" />
+                            {member.email}
+                          </span>
+                          <span className="flex items-center">
+                            <Phone className="h-3 w-3 mr-1" />
+                            {member.phone}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <div className="text-right space-y-1">
+                      <Badge className={getStatusColor(member.status)}>
+                        {member.status}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        {member.membership}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Vence: {member.expires}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    <Badge className={getStatusColor(member.status)}>
-                      {member.status}
-                    </Badge>
-                    <p className="text-xs text-muted-foreground">
-                      {member.membership}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Vence: {member.expires}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -254,6 +267,24 @@ export function Members() {
           </div>
         </CardContent>
       </Card>
+      {/* Modal alta socio */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Registrar Nuevo Socio</DialogTitle>
+            <DialogDescription>Completa los datos para dar de alta un nuevo socio.</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={e => {e.preventDefault(); handleAddMember();}}>
+            <Input name="name" placeholder="Nombre completo" value={form.name} onChange={handleInput} required />
+            <Input name="email" placeholder="Email" value={form.email} onChange={handleInput} required />
+            <Input name="phone" placeholder="Teléfono" value={form.phone} onChange={handleInput} />
+            <Input name="membership" placeholder="Membresía" value={form.membership} onChange={handleInput} />
+            <Input name="status" placeholder="Estado" value={form.status} onChange={handleInput} />
+            <Input name="expires" placeholder="Fecha de vencimiento" value={form.expires} onChange={handleInput} />
+            <Button type="submit" className="w-full" disabled={saving}>{saving ? "Guardando..." : "Registrar"}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
