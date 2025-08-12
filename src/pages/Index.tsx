@@ -1,7 +1,49 @@
-import { Navigation } from "@/components/ui/navigation";
+import { useState } from "react";
 import { Dashboard } from "@/components/dashboard/dashboard";
+import { Members } from "@/components/members/members";
+import { Bookings } from "@/components/bookings/bookings";
+import { Payments } from "@/components/payments/payments";
+import { AccessControl } from "@/components/access/access-control";
+import { CRM } from "@/components/crm/crm";
+import { Reports } from "@/components/reports/reports";
+import { Button } from "@/components/ui/button";
+import { 
+  Home, 
+  Users, 
+  Calendar, 
+  CreditCard, 
+  Shield,
+  MessageSquare,
+  BarChart3, 
+  Bell,
+  Search,
+  User,
+  Settings
+} from "lucide-react";
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  component: React.ComponentType<any>;
+}
+
+const navigationItems: NavigationItem[] = [
+  { id: "dashboard", label: "Dashboard", icon: Home, component: Dashboard },
+  { id: "members", label: "Socios", icon: Users, component: Members },
+  { id: "bookings", label: "Reservas", icon: Calendar, component: Bookings },
+  { id: "payments", label: "Pagos", icon: CreditCard, component: Payments },
+  { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
+  { id: "crm", label: "CRM", icon: MessageSquare, component: CRM },
+  { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
+];
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState("dashboard");
+  
+  const currentComponent = navigationItems.find(item => item.id === activeSection)?.component || Dashboard;
+  const CurrentComponent = currentComponent;
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <div className="flex h-screen">
@@ -27,26 +69,32 @@ const Index = () => {
             <div className="text-xs opacity-75">89% Capacidad</div>
           </div>
 
-          {/* Navigation placeholder - will be enhanced */}
-          <div className="space-y-2">
-            {[
-              { label: "Dashboard", active: true },
-              { label: "Socios", active: false },
-              { label: "Reservas", active: false },
-              { label: "Pagos", active: false },
-              { label: "Reportes", active: false },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                  item.active 
-                    ? "bg-primary text-primary-foreground shadow-md" 
-                    : "text-muted-foreground hover:bg-muted hover:text-card-foreground"
-                }`}
-              >
-                <span className="text-sm font-medium">{item.label}</span>
-              </div>
-            ))}
+          {/* Navigation */}
+          <nav className="space-y-2">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              
+              return (
+                <Button
+                  key={item.id}
+                  variant={isActive ? "iron" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => setActiveSection(item.id)}
+                >
+                  <Icon className="mr-3 h-4 w-4" />
+                  {item.label}
+                </Button>
+              );
+            })}
+          </nav>
+
+          {/* Settings */}
+          <div className="mt-8 pt-4 border-t border-border">
+            <Button variant="ghost" className="w-full justify-start">
+              <Settings className="mr-3 h-4 w-4" />
+              Configuración
+            </Button>
           </div>
         </div>
 
@@ -55,22 +103,35 @@ const Index = () => {
           {/* Top Header */}
           <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h2 className="text-lg font-semibold text-card-foreground">Dashboard Principal</h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar..." 
+                  className="pl-10 pr-4 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-muted-foreground">
-                Último acceso: Hoy, 14:32
-              </div>
-              <div className="h-8 w-8 bg-gradient-iron rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">AD</span>
+              <Button variant="ghost" size="sm">
+                <Bell className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center space-x-2">
+                <div className="text-sm text-muted-foreground text-right">
+                  <div className="font-medium">Admin</div>
+                  <div className="text-xs">Último acceso: Hoy, 14:32</div>
+                </div>
+                <div className="h-8 w-8 bg-gradient-iron rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">AD</span>
+                </div>
               </div>
             </div>
           </header>
 
-          {/* Dashboard Content */}
+          {/* Dynamic Content */}
           <main className="flex-1 p-6 bg-background overflow-auto">
-            <Dashboard />
+            <CurrentComponent />
           </main>
         </div>
       </div>
