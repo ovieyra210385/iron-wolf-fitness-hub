@@ -1,0 +1,38 @@
+{
+  "name": "iron-wolf-backend",
+  "version": "1.0.0",
+  "description": "Backend for Iron Wolf, a comprehensive gym management SaaS.",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "ts-node src/main.ts",
+    "build": "tsc",
+    "dev": "nodemon src/main.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "bcrypt": "^5.0.1",
+    "supabase": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.3",
+    "ts-node": "^10.4.0",
+    "nodemon": "^2.0.12",
+    "jest": "^27.0.6",
+    "@types/jest": "^27.0.1",
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.7.10"
+  },
+  "keywords": [
+    "gym",
+    "management",
+    "saas",
+    "backend"
+  ],
+  "author": "Iron Wolf Team",
+  "license": "MIT"
+}
