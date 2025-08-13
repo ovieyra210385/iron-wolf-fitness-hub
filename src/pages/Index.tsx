@@ -5,6 +5,8 @@ import { Bookings } from "@/components/bookings/bookings";
 import { Payments } from "@/components/payments/payments";
 import { AccessControl } from "@/components/access/access-control";
 import { CRM } from "@/components/crm/crm";
+import { Dumbbell } from "lucide-react";
+import { Training } from "@/components/training/Training";
 import { Reports } from "@/components/reports/reports";
 import { Button } from "@/components/ui/button";
 import { 
@@ -37,7 +39,15 @@ const navigationItems: NavigationItem[] = [
   { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
   { id: "crm", label: "CRM", icon: MessageSquare, component: CRM },
   { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
-    { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
+  { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
+  { id: "dashboard", label: "Dashboard", icon: Home, component: Dashboard },
+  { id: "members", label: "Socios", icon: Users, component: Members },
+  { id: "bookings", label: "Reservas", icon: Calendar, component: Bookings },
+  { id: "payments", label: "Pagos", icon: CreditCard, component: Payments },
+  { id: "training", label: "Entrenamiento", icon: Dumbbell, component: Training },
+  { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
+  { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
+
 ];
 
 const Index = () => {
