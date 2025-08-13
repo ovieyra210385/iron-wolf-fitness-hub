@@ -7,40 +7,42 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
-import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft } from "lucide-react";
-import { MemberAchievements } from "./MemberAchievements"; // ¡Importamos nuestro nuevo componente!
+import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft, Loader2 } from "lucide-react";
+import { MemberAchievements } from "./MemberAchievements"; // ¡Importamos nuestro componente de logros!
 
 // --- NUEVO COMPONENTE INTERNO PARA EL PERFIL DEL SOCIO ---
+// Este componente se encargará de mostrar toda la información de un solo socio.
 function MemberProfile({ member, onBack }) {
   return (
     <div className="space-y-6">
-      <Button variant="outline" onClick={onBack}>
+      <Button variant="outline" size="sm" onClick={onBack}>
         <ArrowLeft className="mr-2 h-4 w-4" />
         Volver a la lista de socios
       </Button>
       
       <Card>
-        <CardHeader>
-            <div className="flex items-center space-x-4">
-                <div className="h-16 w-16 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold text-2xl">
-                    {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </div>
-                <div>
-                    <CardTitle className="text-3xl">{member.name}</CardTitle>
-                    <CardDescription className="flex items-center space-x-4 mt-2">
-                        <span className="flex items-center"><Mail className="h-4 w-4 mr-1 text-muted-foreground" /> {member.email}</span>
-                        <span className="flex items-center"><Phone className="h-4 w-4 mr-1 text-muted-foreground" /> {member.phone}</span>
-                    </CardDescription>
-                </div>
+        <CardHeader className="flex flex-row items-center space-x-4">
+            <div className="h-16 w-16 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            </div>
+            <div>
+                <CardTitle className="text-3xl">{member.name}</CardTitle>
+                <CardDescription className="flex items-center space-x-4 mt-2">
+                    <span className="flex items-center"><Mail className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.email}</span>
+                    <span className="flex items-center"><Phone className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.phone || 'No disponible'}</span>
+                </CardDescription>
             </div>
         </CardHeader>
-        <CardContent>
-          {/* Aquí integramos nuestro componente de logros */}
-          <MemberAchievements memberId={member.id} />
-        </CardContent>
       </Card>
 
-      {/* Aquí podrías añadir más tarjetas con sus planes de entrenamiento, historial de pagos, etc. */}
+      {/* Aquí es donde integramos nuestro componente de logros */}
+      <MemberAchievements memberId={member.id} />
+
+      {/* En el futuro, aquí podrías añadir más tarjetas:
+        - Planes de entrenamiento y nutrición asignados.
+        - Historial de pagos.
+        - Registro de asistencia.
+      */}
     </div>
   );
 }
@@ -50,45 +52,65 @@ export function Members() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", membership: "Básico Mensual" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", membership: "Básico Mensual", status: 'Activo' });
   const [saving, setSaving] = useState(false);
   
   // --- NUEVO ESTADO PARA VER EL PERFIL DE UN SOCIO ---
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const fetchMembers = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("members").select("*").order("name", { ascending: true });
+    if (!error) setMembers(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchMembers = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from("members").select("*").order("name", { ascending: true });
-      if (!error) setMembers(data || []);
-      setLoading(false);
-    };
-    if (!selectedMember) { // Solo carga la lista si no estamos viendo un perfil
+    // Solo cargamos la lista de socios si no estamos viendo un perfil
+    if (!selectedMember) { 
       fetchMembers();
     }
   }, [selectedMember]);
 
-  // ... (tus funciones handleInput y handleAddMember se mantienen igual)
+  const handleInput = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const getStatusColor = (status: string): string => {
+  const handleAddMember = async () => {
+    setSaving(true);
+    const { error } = await supabase.from("members").insert([form]);
+    if (!error) {
+      setShowModal(false);
+      fetchMembers(); // Recargamos la lista
+    }
+    setSaving(false);
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Activo': return 'bg-emerald-500/20 text-emerald-600';
-      case 'Vencido': return 'bg-red-500/20 text-red-600';
-      case 'Suspendido': return 'bg-yellow-500/20 text-yellow-600';
-      default: return 'bg-slate-500/20 text-slate-600';
+      case "Activo": return "bg-fitness-energy text-fitness-dark";
+      case "Suspendido": return "bg-destructive text-destructive-foreground";
+      case "Vencido": return "bg-muted text-muted-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
-  // Si hay un socio seleccionado, muestra su perfil
+  // Si hay un socio seleccionado, muestra su perfil en lugar de la lista
   if (selectedMember) {
     return <MemberProfile member={selectedMember} onBack={() => setSelectedMember(null)} />;
   }
 
-  // Si no, muestra la lista de socios
   return (
     <div className="space-y-6">
-        {/* ... (Todo el JSX del header y las stats cards se mantiene igual) ... */}
-      
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Gestión de Socios</h1>
+          <p className="text-muted-foreground">Administra membresías, altas, bajas y renovaciones</p>
+        </div>
+        <Button variant="iron" size="lg" onClick={() => setShowModal(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Nuevo Socio
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Lista de Socios</CardTitle>
@@ -96,9 +118,12 @@ export function Members() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {loading ? <p>Cargando...</p> : members.map((member) => (
-                // --- AÑADIMOS EL ONCLICK A TODA LA FILA ---
-                <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setSelectedMember(member)}>
+            {loading ? <div className="text-center p-4"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div> : members.map((member) => (
+                <div 
+                  key={member.id} 
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer" 
+                  onClick={() => setSelectedMember(member)} // <-- Acción de clic para ver el perfil
+                >
                   <div className="flex items-center space-x-4">
                     <div className="h-12 w-12 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold">
                         {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
@@ -118,7 +143,25 @@ export function Members() {
         </CardContent>
       </Card>
       
-      {/* ... (El JSX del modal para añadir socio se mantiene igual) ... */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Registrar Nuevo Socio</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input name="name" placeholder="Nombre completo" onChange={handleInput} required />
+            <Input name="email" placeholder="Email" onChange={handleInput} required />
+            <Input name="phone" placeholder="Teléfono" onChange={handleInput} />
+            <Input name="membership" placeholder="Membresía" onChange={handleInput} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowModal(false)}>Cancelar</Button>
+            <Button onClick={handleAddMember} disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Registrar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
