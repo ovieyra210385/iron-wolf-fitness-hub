@@ -38,16 +38,8 @@ const navigationItems: NavigationItem[] = [
   { id: "payments", label: "Pagos", icon: CreditCard, component: Payments },
   { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
   { id: "crm", label: "CRM", icon: MessageSquare, component: CRM },
-  { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
-  { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
-  { id: "dashboard", label: "Dashboard", icon: Home, component: Dashboard },
-  { id: "members", label: "Socios", icon: Users, component: Members },
-  { id: "bookings", label: "Reservas", icon: Calendar, component: Bookings },
-  { id: "payments", label: "Pagos", icon: CreditCard, component: Payments },
   { id: "training", label: "Entrenamiento", icon: Dumbbell, component: Training },
   { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
-  { id: "settings", label: "Configuración", icon: SettingsIcon, component: Settings },
-
 ];
 
 const Index = () => {
