@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
+import { ActivityCard } from "./ActivityCard";
 import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft, Loader2 } from "lucide-react";
 import { MemberAchievements } from "./MemberAchievements"; // ¡Importamos nuestro componente de logros!
 
@@ -22,6 +23,7 @@ function MemberProfile({ member, onBack }) {
       
       <Card>
         <CardHeader className="flex flex-row items-center space-x-4">
+          <ActivityCard memberId={member.id} />
             <div className="h-16 w-16 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold text-2xl">
                 {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
@@ -31,6 +33,7 @@ function MemberProfile({ member, onBack }) {
                     <span className="flex items-center"><Mail className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.email}</span>
                     <span className="flex items-center"><Phone className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.phone || 'No disponible'}</span>
                 </CardDescription>
+                <MemberAchievements memberId={member.id} />
             </div>
         </CardHeader>
       </Card>
