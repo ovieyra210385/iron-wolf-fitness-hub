@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Loader2 } from 'lucide-react';
 
 // Esta página no muestra casi nada, solo procesa la redirección y se va.
-export function GoogleCallback() {
+export default function GoogleCallback() {
   const [message, setMessage] = useState('Procesando autorización...');
   const location = useLocation();
   const navigate = useNavigate();

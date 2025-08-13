@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
 import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft, Loader2 } from "lucide-react";
 import { MemberAchievements } from "./MemberAchievements"; // ¡Importamos nuestro componente de logros!
