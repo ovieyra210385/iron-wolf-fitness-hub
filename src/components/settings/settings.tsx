@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 export function Settings() {
   // Configuración editable desde Supabase
   const [config, setConfig] = useState({
+    id: null,
     gymName: "",
     address: "",
     phone: "",

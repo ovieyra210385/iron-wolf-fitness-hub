@@ -70,8 +70,13 @@ export function Members() {
 
   // ... (tus funciones handleInput y handleAddMember se mantienen igual)
 
-  const getStatusColor = (status: string) => {
-    // ...
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'Activo': return 'bg-emerald-500/20 text-emerald-600';
+      case 'Vencido': return 'bg-red-500/20 text-red-600';
+      case 'Suspendido': return 'bg-yellow-500/20 text-yellow-600';
+      default: return 'bg-slate-500/20 text-slate-600';
+    }
   };
 
   // Si hay un socio seleccionado, muestra su perfil
