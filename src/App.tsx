@@ -1,17 +1,14 @@
-// src/App.tsx
-
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Importamos las páginas
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login"; // <-- Sintaxis de importación más simple
-import ClientLayout from "./pages/ClientLayout";
-import { ClientDashboard } from "@/components/client/ClientDashboard";
+// Lazy imports
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
 
 const queryClient = new QueryClient();
 
@@ -19,17 +16,17 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-    <SonnerToaster />
+      <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Index />} />
-          <Route path="/app" element={<ClientLayout />}>
-            <Route index element={<ClientDashboard />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {/* Suspense muestra un loader mientras carga cada página */}
+        <Suspense fallback={<div className="p-4 text-center">Cargando...</div>}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/callback/google" element={<GoogleCallback />} />
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

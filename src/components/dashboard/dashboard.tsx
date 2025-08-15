@@ -142,10 +142,10 @@ export function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-  <StatCard title="Socios Activos" value="342" icon={Users} trend="up" trendValue="+12 este mes" />
-  <StatCard title="Ingresos del Mes" value="$45,231" icon={DollarSign} trend="up" trendValue="+8.2%" />
-  <StatCard title="Clases Reservadas" value="168" icon={CalendarIcon} trend="neutral" trendValue="Estable" />
-  <StatCard title="Canchas Ocupadas" value="3/6" icon={MapPin} trend="neutral" trendValue="50% ocupación" />
+        <StatCard title="Socios Activos" value="342" icon={Users} trend="up" trendValue="+12 este mes" />
+        <StatCard title="Ingresos del Mes" value="$45,231" icon={DollarSign} trend="up" trendValue="+8.2%" />
+        <StatCard title="Clases Reservadas" value="168" icon={Calendar} trend="neutral" trendValue="Estable" />
+        <StatCard title="Canchas Ocupadas" value="3/6" icon={MapPin} trend="neutral" trendValue="50% ocupación" />
       </div>
 
       {/* Sección de Gráficos */}
@@ -162,7 +162,7 @@ export function Dashboard() {
             <CardDescription className="text-xs">Distribución de socios por plan.</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 flex items-center justify-center pb-6">
-            <MembershipChart />
+            <MembershipChart dateRange={dateRange} />
           </CardContent>
         </Card>
       </div>
