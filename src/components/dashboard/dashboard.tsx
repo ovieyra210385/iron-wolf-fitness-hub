@@ -1,15 +1,30 @@
+// src/components/dashboard/dashboard.tsx
+
+import { useState } from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, TrendingUp, Calendar, CreditCard, Activity, Clock, MapPin, Shield, DollarSign, Zap } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
+import { format, subDays } from "date-fns";
+import { Calendar as CalendarIcon, Users, DollarSign, MapPin, CreditCard, Activity, Clock, Shield, Zap } from "lucide-react";
 import heroImage from "@/assets/hero-gym.jpg";
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { POS } from "@/components/pos/pos";
 import { Settings } from "@/components/settings/settings";
 
+import { MembershipChart } from "./MembershipChart";
+import { ActivityChart } from "./ActivityChart";
+
 export function Dashboard() {
+  // Estado para el rango de fechas (últimos 7 días por defecto)
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
   // Panel de notificaciones
   const [notifications, setNotifications] = useState([
     { type: "pago", message: "Pago pendiente de Luis Fernández (Premium Mensual)", time: "hace 2h" },
@@ -36,6 +51,7 @@ export function Dashboard() {
     setSelectedSlot(slotIndex);
     setShowDialog(true);
   };
+  
   const handleConfirmPayment = () => {
     setPaymentDone(true);
     setPickleballSlots((slots) =>
@@ -54,7 +70,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Section */}
+      {/* Hero Section con Selector de Fechas */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-hero p-8 text-white">
         <div className="absolute inset-0 opacity-20">
           <img 
@@ -81,19 +97,80 @@ export function Dashboard() {
                 </Badge>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm opacity-75">Acceso del día</p>
-              <p className="text-2xl font-bold">89%</p>
+            <div className="flex flex-col items-end">
+              {/* Selector de Fechas */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className="w-[280px] justify-start text-left font-normal mb-2"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "LLL dd, y")} -{" "}
+                          {format(dateRange.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Selecciona un rango</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+              <div className="text-right">
+                <p className="text-sm opacity-75">Acceso del día</p>
+                <p className="text-2xl font-bold">89%</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Socios Activos" value="342" icon={Users} trend="up" trendValue="+12 este mes" />
+        <StatCard title="Ingresos del Mes" value="$45,231" icon={DollarSign} trend="up" trendValue="+8.2%" />
+        <StatCard title="Clases Reservadas" value="168" icon={Calendar} trend="neutral" trendValue="Estable" />
+        <StatCard title="Canchas Ocupadas" value="3/6" icon={MapPin} trend="neutral" trendValue="50% ocupación" />
+      </div>
+
+      {/* Sección de Gráficos */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Gráfico de actividad con rango de fechas */}
+        <div className="lg:col-span-2">
+          <ActivityChart dateRange={dateRange} />
+        </div>
+
+        {/* Gráfico de membresías con rango de fechas */}
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Membresías</CardTitle>
+            <CardDescription className="text-xs">Distribución de socios por plan.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 flex items-center justify-center pb-6">
+            <MembershipChart dateRange={dateRange} />
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Panel de Notificaciones */}
       <Card>
         <CardHeader>
-          <CardTitle>Notificaciones</CardTitle>
-          <CardDescription>Alertas y recordatorios importantes</CardDescription>
+          <CardTitle>Notificaciones y Actividad Reciente</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -129,50 +206,6 @@ export function Dashboard() {
           <Shield className="h-6 w-6 mb-2" />
           Control de Acceso
         </Button>
-        <Button variant="outline" className="h-20 flex-col">
-          <CreditCard className="h-6 w-6 mb-2" />
-          Punto de Venta (POS)
-        </Button>
-        <Button variant="outline" className="h-20 flex-col">
-          <Activity className="h-6 w-6 mb-2" />
-          Configuración
-        </Button>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Socios Activos"
-          value="342"
-          description="Total de miembros activos"
-          icon={Users}
-          trend="up"
-          trendValue="+12 este mes"
-        />
-        <StatCard
-          title="Ingresos del Mes"
-          value="$45,231"
-          description="Ingresos de membresías y servicios"
-          icon={DollarSign}
-          trend="up"
-          trendValue="+8.2%"
-        />
-        <StatCard
-          title="Clases Reservadas"
-          value="168"
-          description="Reservas para hoy"
-          icon={Calendar}
-          trend="neutral"
-          trendValue="Estable"
-        />
-        <StatCard
-          title="Canchas Ocupadas"
-          value="3/6"
-          description="Pickleball en uso"
-          icon={MapPin}
-          trend="neutral"
-          trendValue="50% ocupación"
-        />
       </div>
 
       {/* Widget Renta de Cancha Pickleball */}
@@ -215,57 +248,40 @@ export function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Actividad Reciente y Estado del Sistema */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Activity className="mr-2 h-5 w-5" />
-              Actividad Reciente
-            </CardTitle>
-            <CardDescription>
-              Últimas actividades en el sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Aquí puedes mostrar la actividad reciente */}
+      {/* Estado del Sistema */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="mr-2 h-5 w-5" />
+            Estado del Sistema
+          </CardTitle>
+          <CardDescription>
+            Información en tiempo real de tu gimnasio
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-fitness-energy">89%</div>
+              <p className="text-sm text-muted-foreground">Capacidad Actual</p>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="mr-2 h-5 w-5" />
-              Estado del Sistema
-            </CardTitle>
-            <CardDescription>
-              Información en tiempo real de tu gimnasio
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-fitness-energy">89%</div>
-                <p className="text-sm text-muted-foreground">Capacidad Actual</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">6</div>
-                <p className="text-sm text-muted-foreground">Clases Activas</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-accent">24</div>
-                <p className="text-sm text-muted-foreground">Entrenadores en Línea</p>
-              </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">6</div>
+              <p className="text-sm text-muted-foreground">Clases Activas</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">24</div>
+              <p className="text-sm text-muted-foreground">Entrenadores en Línea</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* POS integrado */}
       <div className="mt-8">
         <POS />
       </div>
+      
       {/* Settings integrado */}
       <div className="mt-8">
         <Settings />
