@@ -8,9 +8,44 @@ import { Dumbbell, Utensils, Loader2, ArrowRight } from "lucide-react";
 import { ClientTrainingPlanDetails } from './ClientTrainingPlanDetails';
 import { ClientNutritionPlanDetails } from './ClientNutritionPlanDetails'; // <-- 1. Importa la nueva vista
 
-// El hook `useMemberData` se mantiene exactamente igual
+// Hook para obtener los planes del miembro autenticado
 const useMemberData = () => {
-    // ... (código sin cambios)
+  const [loading, setLoading] = useState(true);
+  const [memberPlans, setMemberPlans] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Aquí deberías obtener el usuario autenticado y luego sus planes
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setError("No hay usuario autenticado");
+          setLoading(false);
+          return;
+        }
+        // Supón que tienes una tabla 'member_plans' relacionada al user.id
+        const { data, error } = await supabase
+          .from('member_plans')
+          .select('training_plan:training_plan_id(*), nutrition_plan:nutrition_plan_id(*)')
+          .eq('user_id', user.id)
+          .single();
+        if (error) {
+          setError(error.message);
+        } else {
+          setMemberPlans(data);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Error desconocido');
+      }
+      setLoading(false);
+    };
+    fetchPlans();
+  }, []);
+
+  return { loading, memberPlans, error };
 };
 
 export function ClientDashboard() {
@@ -71,3 +106,5 @@ export function ClientDashboard() {
     </div>
   );
 }
+
+// export { ClientDashboard }; // Eliminado para evitar doble exportación

@@ -13,7 +13,7 @@ interface ClientNutritionPlanDetailsProps {
 }
 
 export function ClientNutritionPlanDetails({ plan, onBack }: ClientNutritionPlanDetailsProps) {
-  const [meals, setMeals] = useState([]);
+  const [meals, setMeals] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

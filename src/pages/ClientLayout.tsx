@@ -47,3 +47,5 @@ export function ClientLayout() {
     </div>
   );
 }
+
+export default ClientLayout;
