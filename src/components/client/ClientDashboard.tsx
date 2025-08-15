@@ -1,13 +1,14 @@
 // src/components/client/ClientDashboard.tsx
 
-import React, { useState, useEffect } from 'react'; // <-- Asegúrate de importar useState
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button"; // <-- Importa el botón
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import { Dumbbell, Utensils, Loader2, ArrowRight } from "lucide-react";
-import { ClientTrainingPlanDetails } from './ClientTrainingPlanDetails'; // <-- Importa la nueva vista
+import { ClientTrainingPlanDetails } from './ClientTrainingPlanDetails';
+import { ClientNutritionPlanDetails } from './ClientNutritionPlanDetails'; // <-- 1. Importa la nueva vista
 
-// El hook personalizado `useMemberData` se mantiene exactamente igual
+// El hook `useMemberData` se mantiene exactamente igual
 const useMemberData = () => {
     // ... (código sin cambios)
 };
@@ -15,24 +16,24 @@ const useMemberData = () => {
 export function ClientDashboard() {
   const { loading, memberPlans, error } = useMemberData();
   
-  // --- NUEVO ESTADO PARA GESTIONAR LA VISTA ---
-  const [activeView, setActiveView] = useState<'dashboard' | 'training_details'>('dashboard');
+  // --- 2. El estado ahora gestiona tres vistas ---
+  const [activeView, setActiveView] = useState<'dashboard' | 'training_details' | 'nutrition_details'>('dashboard');
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
-
   if (error) {
     return <p className="text-destructive">Error: {error}</p>;
   }
   
-  // --- RENDERIZADO CONDICIONAL ---
-  // Si la vista activa es 'training_details', muestra ese componente
+  // --- 3. Lógica de renderizado expandida ---
   if (activeView === 'training_details' && memberPlans?.training_plan) {
     return <ClientTrainingPlanDetails plan={memberPlans.training_plan} onBack={() => setActiveView('dashboard')} />;
   }
+  if (activeView === 'nutrition_details' && memberPlans?.nutrition_plan) {
+    return <ClientNutritionPlanDetails plan={memberPlans.nutrition_plan} onBack={() => setActiveView('dashboard')} />;
+  }
 
-  // Si no, muestra el dashboard principal
   return (
     <div className="space-y-6 p-4 md:p-6">
       <h1 className="text-3xl font-heading font-bold">Bienvenido a Iron Wolf</h1>
@@ -40,31 +41,31 @@ export function ClientDashboard() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Plan de Entrenamiento</CardTitle>
-              <CardDescription>Tu rutina asignada.</CardDescription>
-            </div>
-            <Dumbbell className="h-8 w-8 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {memberPlans?.training_plan ? (
-              <div>
-                <h3 className="font-bold text-lg text-primary">{memberPlans.training_plan.name}</h3>
-                <p className="text-muted-foreground mt-1">{memberPlans.training_plan.description}</p>
-                {/* --- BOTÓN PARA VER DETALLES --- */}
-                <Button className="mt-4" onClick={() => setActiveView('training_details')}>
-                  Ver mi Rutina <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <p className="text-muted-foreground">Aún no tienes un plan de entrenamiento asignado. ¡Pídeselo a tu entrenador!</p>
-            )}
-          </CardContent>
+          {/* ... Tarjeta de Entrenamiento (sin cambios) ... */}
         </Card>
 
         <Card>
-          {/* ... Tarjeta de Plan de Nutrición (sin cambios por ahora) ... */}
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Plan de Nutrición</CardTitle>
+              <CardDescription>Tu dieta recomendada.</CardDescription>
+            </div>
+            <Utensils className="h-8 w-8 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {memberPlans?.nutrition_plan ? (
+              <div>
+                <h3 className="font-bold text-lg text-green-500">{memberPlans.nutrition_plan.name}</h3>
+                <p className="text-muted-foreground mt-1">{memberPlans.nutrition_plan.calories} kcal aproximadas</p>
+                {/* --- 4. Botón activado para ver detalles --- */}
+                <Button variant="outline" className="mt-4" onClick={() => setActiveView('nutrition_details')}>
+                  Ver mi Dieta <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Aún no tienes un plan de nutrición asignado.</p>
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>
