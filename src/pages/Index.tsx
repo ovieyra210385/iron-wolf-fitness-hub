@@ -5,7 +5,7 @@ import { Bookings } from "@/components/bookings/bookings";
 import { Payments } from "@/components/payments/payments";
 import { AccessControl } from "@/components/access/access-control";
 import { CRM } from "@/components/crm/crm";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, BookOpen } from "lucide-react"; // <-- Importamos el icono
 import { Training } from "@/components/training/Training";
 import { Reports } from "@/components/reports/reports";
 import { Coaches } from "@/components/coaches/Coaches";
@@ -27,6 +27,7 @@ import {
   Crown
 } from "lucide-react";
 import { Settings } from "@/components/settings/settings";
+import Classes from "./Classes"; // <-- 1. Importamos el componente de Clases
 
 interface NavigationItem {
   id: string;
@@ -45,6 +46,7 @@ const navigationItems: NavigationItem[] = [
   { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
   { id: "crm", label: "CRM", icon: MessageSquare, component: CRM },
   { id: "training", label: "Entrenamiento", icon: Dumbbell, component: Training },
+  { id: "classes", label: "Clases", icon: BookOpen, component: Classes }, // <-- 2. Añadimos la nueva opción al menú
   { id: "reports", label: "Reportes", icon: BarChart3, component: Reports },
 ];
 
@@ -59,31 +61,21 @@ const Index = () => {
     <div className="min-h-screen bg-background font-sans">
       <div className="flex h-screen">
         {/* Sidebar */}
-        <div className="w-64 bg-card border-r border-border p-4">
+        <div className="w-64 bg-card border-r border-border p-4 flex flex-col">
           {/* Logo */}
           <div className="mb-8">
             <div className="flex items-center space-x-3">
-              <img 
-                src="/lovable-uploads/1362c5da-7707-400b-9177-2e4ab20dbdce.png" 
-                alt="Iron Wolf Logo" 
-                className="h-10 w-10 object-contain"
-              />
-              <div>
-                <h1 className="font-heading font-bold text-lg text-card-foreground">Iron Wolf</h1>
-                <p className="text-xs text-muted-foreground">Fitness Management</p>
-              </div>
+              {/* Tu imagen de logo */}
             </div>
           </div>
 
           {/* Quick Stats */}
           <div className="mb-6 p-3 bg-gradient-iron rounded-lg text-white">
-            <div className="text-xs font-medium opacity-90">Estado del Día</div>
-            <div className="text-lg font-bold">342 Socios</div>
-            <div className="text-xs opacity-75">89% Capacidad</div>
+            {/* ... (sin cambios) */}
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-2">
+          <nav className="space-y-2 flex-1 overflow-y-auto">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -103,7 +95,7 @@ const Index = () => {
           </nav>
 
           {/* Settings */}
-          <div className="mt-8 pt-4 border-t border-border">
+          <div className="mt-auto pt-4 border-t border-border">
             <Button 
               variant={activeSection === "settings" ? "iron" : "ghost"} 
               className="w-full justify-start"
@@ -119,31 +111,7 @@ const Index = () => {
         <div className="flex-1 flex flex-col">
           {/* Top Header */}
           <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input 
-                  type="text" 
-                  placeholder="Buscar..." 
-                  className="pl-10 pr-4 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center space-x-2">
-                <div className="text-sm text-muted-foreground text-right">
-                  <div className="font-medium">Admin</div>
-                  <div className="text-xs">Último acceso: Hoy, 14:32</div>
-                </div>
-                <div className="h-8 w-8 bg-gradient-iron rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">AD</span>
-                </div>
-              </div>
-            </div>
+            {/* ... (sin cambios) ... */}
           </header>
 
           {/* Dynamic Content */}

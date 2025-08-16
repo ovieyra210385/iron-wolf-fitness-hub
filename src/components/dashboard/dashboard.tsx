@@ -101,10 +101,8 @@ export function Dashboard() {
               {/* Selector de Fechas */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className="w-[280px] justify-start text-left font-normal mb-2"
-                  >
+                  <Button variant={"outline"}
+                  className="w-[280px] justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateRange?.from ? (
                       dateRange.to ? (
@@ -121,15 +119,15 @@ export function Dashboard() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
+               <Calendar 
+                 initialFocus
+                 mode="range"
+                 defaultMonth={dateRange?.from}
+                 selected={dateRange}
+                 onSelect={setDateRange}
+                 numberOfMonths={2}
+                 />
+                 </PopoverContent>
               </Popover>
               <div className="text-right">
                 <p className="text-sm opacity-75">Acceso del día</p>
