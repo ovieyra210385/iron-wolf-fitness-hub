@@ -31,12 +31,20 @@ export default function GoogleCallback() {
       }
       
       try {
-        // ¡Aquí sucede la magia! Enviamos el código a nuestro backend.
-        // Asegúrate de que la URL coincida con tu servidor de backend.
+        // Get auth token for secure request
+        const { data: { session } } = await supabase.auth.getSession();
+        const authToken = session?.access_token;
+
+        if (!authToken) {
+          throw new Error('No se pudo obtener el token de autenticación');
+        }
+
+        // Send secure request with auth token
         const response = await fetch('http://localhost:3000/integrations/google/connect', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
           },
           body: JSON.stringify({ code, memberId }),
         });
