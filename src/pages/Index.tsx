@@ -8,6 +8,8 @@ import { CRM } from "@/components/crm/crm";
 import { Dumbbell } from "lucide-react";
 import { Training } from "@/components/training/Training";
 import { Reports } from "@/components/reports/reports";
+import { Coaches } from "@/components/coaches/Coaches";
+import { Memberships } from "@/components/memberships/Memberships";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
@@ -20,7 +22,9 @@ import {
   Bell,
   Search,
   User,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  UserCheck,
+  Crown
 } from "lucide-react";
 import { Settings } from "@/components/settings/settings";
 
@@ -34,6 +38,8 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, component: Dashboard },
   { id: "members", label: "Socios", icon: Users, component: Members },
+  { id: "coaches", label: "Coaches", icon: UserCheck, component: Coaches },
+  { id: "memberships", label: "Membresías", icon: Crown, component: Memberships },
   { id: "bookings", label: "Reservas", icon: Calendar, component: Bookings },
   { id: "payments", label: "Pagos", icon: CreditCard, component: Payments },
   { id: "access", label: "Control de Acceso", icon: Shield, component: AccessControl },
@@ -45,7 +51,8 @@ const navigationItems: NavigationItem[] = [
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   
-  const currentComponent = navigationItems.find(item => item.id === activeSection)?.component || Dashboard;
+  const currentComponent = navigationItems.find(item => item.id === activeSection)?.component || 
+    (activeSection === "settings" ? Settings : Dashboard);
   const CurrentComponent = currentComponent;
 
   return (
@@ -55,10 +62,12 @@ const Index = () => {
         <div className="w-64 bg-card border-r border-border p-4">
           {/* Logo */}
           <div className="mb-8">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-iron rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-sm">IW</span>
-              </div>
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/lovable-uploads/1362c5da-7707-400b-9177-2e4ab20dbdce.png" 
+                alt="Iron Wolf Logo" 
+                className="h-10 w-10 object-contain"
+              />
               <div>
                 <h1 className="font-heading font-bold text-lg text-card-foreground">Iron Wolf</h1>
                 <p className="text-xs text-muted-foreground">Fitness Management</p>

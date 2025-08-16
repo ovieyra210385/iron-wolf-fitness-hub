@@ -144,7 +144,7 @@ export function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Socios Activos" value="342" icon={Users} trend="up" trendValue="+12 este mes" />
         <StatCard title="Ingresos del Mes" value="$45,231" icon={DollarSign} trend="up" trendValue="+8.2%" />
-        <StatCard title="Clases Reservadas" value="168" icon={Calendar} trend="neutral" trendValue="Estable" />
+        <StatCard title="Clases Reservadas" value="168" icon={CalendarIcon} trend="neutral" trendValue="Estable" />
         <StatCard title="Canchas Ocupadas" value="3/6" icon={MapPin} trend="neutral" trendValue="50% ocupación" />
       </div>
 
@@ -152,7 +152,7 @@ export function Dashboard() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Gráfico de actividad con rango de fechas */}
         <div className="lg:col-span-2">
-          <ActivityChart dateRange={dateRange} />
+          <ActivityChart />
         </div>
 
         {/* Gráfico de membresías con rango de fechas */}
@@ -162,7 +162,7 @@ export function Dashboard() {
             <CardDescription className="text-xs">Distribución de socios por plan.</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 flex items-center justify-center pb-6">
-            <MembershipChart dateRange={dateRange} />
+            <MembershipChart />
           </CardContent>
         </Card>
       </div>

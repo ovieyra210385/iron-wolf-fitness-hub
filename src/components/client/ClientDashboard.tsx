@@ -7,9 +7,35 @@ import { supabase } from "@/lib/supabaseClient";
 import { Dumbbell, Utensils, Loader2, ArrowRight } from "lucide-react";
 import { ClientTrainingPlanDetails } from './ClientTrainingPlanDetails'; // <-- Importa la nueva vista
 
-// El hook personalizado `useMemberData` se mantiene exactamente igual
+// Hook personalizado para obtener datos del miembro
 const useMemberData = () => {
-    // ... (código sin cambios)
+  const [loading, setLoading] = useState(true);
+  const [memberPlans, setMemberPlans] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMemberData = async () => {
+      try {
+        // Simular carga de datos
+        setTimeout(() => {
+          setMemberPlans({
+            training_plan: {
+              name: "Plan de Fuerza",
+              description: "Rutina enfocada en desarrollo de fuerza muscular"
+            }
+          });
+          setLoading(false);
+        }, 1000);
+      } catch (err) {
+        setError('Error al cargar los datos');
+        setLoading(false);
+      }
+    };
+
+    fetchMemberData();
+  }, []);
+
+  return { loading, memberPlans, error };
 };
 
 export function ClientDashboard() {
@@ -64,7 +90,16 @@ export function ClientDashboard() {
         </Card>
 
         <Card>
-          {/* ... Tarjeta de Plan de Nutrición (sin cambios por ahora) ... */}
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Plan de Nutrición</CardTitle>
+              <CardDescription>Tu dieta personalizada.</CardDescription>
+            </div>
+            <Utensils className="h-8 w-8 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Próximamente disponible tu plan nutricional personalizado.</p>
+          </CardContent>
         </Card>
       </div>
     </div>

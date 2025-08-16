@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
+const LoginPage = lazy(() => import("./components/auth/LoginPage").then(module => ({ default: module.LoginPage })));
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
         <Suspense fallback={<div className="p-4 text-center">Cargando...</div>}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/callback/google" element={<GoogleCallback />} />
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

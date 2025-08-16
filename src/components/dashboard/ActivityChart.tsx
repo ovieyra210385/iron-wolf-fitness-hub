@@ -11,8 +11,8 @@ const chartConfig = {
     visits: { label: "Visitas", color: "hsl(var(--primary))" },
 };
 
-// El componente ahora acepta un rango de fechas
-export function ActivityChart({ dateRange }) {
+// El componente ahora acepta un rango de fechas opcional
+export function ActivityChart({ dateRange }: { dateRange?: any }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
