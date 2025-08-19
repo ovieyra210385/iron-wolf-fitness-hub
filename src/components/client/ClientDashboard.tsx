@@ -1,3 +1,4 @@
+export default ClientDashboard;
 // src/components/client/ClientDashboard.tsx
 
 import React, { useState, useEffect } from 'react'; // <-- Asegúrate de importar useState
