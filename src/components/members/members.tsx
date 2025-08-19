@@ -1,18 +1,88 @@
 // src/components/members/members.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Limpiamos los imports duplicados
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
 import { ActivityCard } from "./ActivityCard";
-import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft, Loader2 } from "lucide-react";
-import { MemberAchievements } from "./MemberAchievements"; // ¡Importamos nuestro componente de logros!
+import { Users, UserPlus, Search, Filter, Mail, Phone, ArrowLeft, Loader2, Fingerprint } from "lucide-react";
+import { MemberAchievements } from "./MemberAchievements";
 
-// --- NUEVO COMPONENTE INTERNO PARA EL PERFIL DEL SOCIO ---
-// Este componente se encargará de mostrar toda la información de un solo socio.
+// --- NUEVO COMPONENTE PARA LA GESTIÓN BIOMÉTRICA ---
+function BiometricAccessCard({ memberId }) {
+  const [enrolled, setEnrolled] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const checkEnrollment = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('facial_access_data')
+      .select('id')
+      .eq('member_id', memberId)
+      .single();
+    
+    setEnrolled(!!data);
+    setLoading(false);
+  }, [memberId]);
+
+  useEffect(() => {
+    checkEnrollment();
+  }, [checkEnrollment]);
+
+  const handleEnroll = async () => {
+    setLoading(true);
+    // Simulación de captura y guardado. En un caso real, esto llamaría a una Edge Function.
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const { error } = await supabase.from('facial_access_data').insert({
+        member_id: memberId,
+        face_vector_id: `vec_${Math.random().toString(36).substring(2, 11)}`,
+        provider: 'Simulated Device'
+    });
+
+    if (error) {
+        alert("Error al enrolar. Asegúrate de que las políticas de RLS permitan esta acción.");
+        console.error(error);
+    } else {
+        await checkEnrollment();
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Acceso Biométrico</CardTitle>
+        <CardDescription>Gestiona el acceso por huella o rostro.</CardDescription>
+      </CardHeader>
+      <CardContent className="text-center">
+        <Fingerprint className={`mx-auto h-12 w-12 mb-4 ${enrolled ? 'text-green-500' : 'text-muted-foreground'}`} />
+        {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> :
+          enrolled ? (
+            <>
+              <p className="font-semibold text-green-600">Socio Enrolado</p>
+              <p className="text-sm text-muted-foreground">El acceso biométrico está activo.</p>
+            </>
+          ) : (
+            <>
+              <p className="font-semibold">Socio No Enrolado</p>
+              <Button size="sm" className="mt-2" onClick={handleEnroll}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Registrar Biometría
+              </Button>
+            </>
+          )
+        }
+      </CardContent>
+    </Card>
+  );
+}
+
+
+// --- PERFIL DEL SOCIO (REESTRUCTURADO Y LIMPIO) ---
 function MemberProfile({ member, onBack }) {
   return (
     <div className="space-y-6">
@@ -21,44 +91,41 @@ function MemberProfile({ member, onBack }) {
         Volver a la lista de socios
       </Button>
       
+      {/* Tarjeta de Información Principal */}
       <Card>
         <CardHeader className="flex flex-row items-center space-x-4">
-          <ActivityCard memberId={member.id} />
-            <div className="h-16 w-16 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold text-2xl">
-                {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            </div>
-            <div>
-                <CardTitle className="text-3xl">{member.name}</CardTitle>
-                <CardDescription className="flex items-center space-x-4 mt-2">
-                    <span className="flex items-center"><Mail className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.email}</span>
-                    <span className="flex items-center"><Phone className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.phone || 'No disponible'}</span>
-                </CardDescription>
-                <MemberAchievements memberId={member.id} />
-            </div>
+          <div className="h-16 w-16 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold text-2xl">
+            {member.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          </div>
+          <div>
+            <CardTitle className="text-3xl">{member.name}</CardTitle>
+            <CardDescription className="flex items-center space-x-4 mt-2">
+              <span className="flex items-center"><Mail className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.email}</span>
+              <span className="flex items-center"><Phone className="h-4 w-4 mr-1.5 text-muted-foreground" /> {member.phone || 'No disponible'}</span>
+            </CardDescription>
+          </div>
         </CardHeader>
       </Card>
 
-      {/* Aquí es donde integramos nuestro componente de logros */}
-      <MemberAchievements memberId={member.id} />
+      {/* Grid para las tarjetas secundarias */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <BiometricAccessCard memberId={member.id} />
+        <ActivityCard memberId={member.id} />
+      </div>
 
-      {/* En el futuro, aquí podrías añadir más tarjetas:
-        - Planes de entrenamiento y nutrición asignados.
-        - Historial de pagos.
-        - Registro de asistencia.
-      */}
+      <MemberAchievements memberId={member.id} />
     </div>
   );
 }
 
 
+// --- COMPONENTE PRINCIPAL Members (SIN CAMBIOS EN SU LÓGICA) ---
 export function Members() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", membership: "Básico Mensual", status: 'Activo' });
   const [saving, setSaving] = useState(false);
-  
-  // --- NUEVO ESTADO PARA VER EL PERFIL DE UN SOCIO ---
   const [selectedMember, setSelectedMember] = useState(null);
 
   const fetchMembers = async () => {
@@ -69,7 +136,6 @@ export function Members() {
   };
 
   useEffect(() => {
-    // Solo cargamos la lista de socios si no estamos viendo un perfil
     if (!selectedMember) { 
       fetchMembers();
     }
@@ -82,7 +148,7 @@ export function Members() {
     const { error } = await supabase.from("members").insert([form]);
     if (!error) {
       setShowModal(false);
-      fetchMembers(); // Recargamos la lista
+      fetchMembers();
     }
     setSaving(false);
   };
@@ -96,7 +162,6 @@ export function Members() {
     }
   };
 
-  // Si hay un socio seleccionado, muestra su perfil en lugar de la lista
   if (selectedMember) {
     return <MemberProfile member={selectedMember} onBack={() => setSelectedMember(null)} />;
   }
@@ -106,7 +171,7 @@ export function Members() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Gestión de Socios</h1>
-          <p className="text-muted-foreground">Administra membresías, altas, bajas y renovaciones</p>
+          <p className="text-muted-foreground">Administra membresías, altas, bajas y renovaciones.</p>
         </div>
         <Button variant="iron" size="lg" onClick={() => setShowModal(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
@@ -117,7 +182,7 @@ export function Members() {
       <Card>
         <CardHeader>
           <CardTitle>Lista de Socios</CardTitle>
-          <CardDescription>Haz clic en un socio para ver su perfil y logros.</CardDescription>
+          <CardDescription>Haz clic en un socio para ver su perfil completo.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -125,7 +190,7 @@ export function Members() {
                 <div 
                   key={member.id} 
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer" 
-                  onClick={() => setSelectedMember(member)} // <-- Acción de clic para ver el perfil
+                  onClick={() => setSelectedMember(member)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="h-12 w-12 bg-gradient-iron rounded-full flex items-center justify-center text-white font-bold">
