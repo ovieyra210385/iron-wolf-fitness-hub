@@ -48,17 +48,12 @@ export class IntegrationsController {
     }
 
     try {
-      // 1. Get secrets from Supabase secrets
-      const { data: secrets } = await this.serviceClient.from('vault').select('*').in('name', [
-        'GOOGLE_CLIENT_ID',
-        'GOOGLE_CLIENT_SECRET'
-      ]);
-
-      const clientId = secrets?.find(s => s.name === 'GOOGLE_CLIENT_ID')?.decrypted_secret;
-      const clientSecret = secrets?.find(s => s.name === 'GOOGLE_CLIENT_SECRET')?.decrypted_secret;
+      // 1. Get secrets from environment variables (more secure)
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
       if (!clientId || !clientSecret) {
-        throw new Error('Credenciales de Google no configuradas');
+        throw new Error('Google credentials not configured in environment variables');
       }
 
       // 2. Exchange code for tokens with Google
@@ -102,28 +97,48 @@ export class IntegrationsController {
   }
 
   private async encryptToken(token: string): Promise<string> {
-    // Simple encryption using built-in crypto
     const crypto = require('crypto');
     const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(process.env.ENCRYPTION_KEY || 'default-key-change-in-production-32b', 'utf-8');
+    
+    // Use proper 32-byte key from environment
+    const encryptionKey = process.env.ENCRYPTION_KEY;
+    if (!encryptionKey || encryptionKey.length !== 64) {
+      throw new Error('ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');
+    }
+    
+    const key = Buffer.from(encryptionKey, 'hex');
     const iv = crypto.randomBytes(16);
     
-    const cipher = crypto.createCipher(algorithm, key);
+    const cipher = crypto.createCipherGCM(algorithm, key, iv);
     let encrypted = cipher.update(token, 'utf8', 'hex');
     encrypted += cipher.final('hex');
+    const authTag = cipher.getAuthTag();
     
-    return `${iv.toString('hex')}:${encrypted}`;
+    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
   }
 
   private async decryptToken(encryptedToken: string): Promise<string> {
     const crypto = require('crypto');
     const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(process.env.ENCRYPTION_KEY || 'default-key-change-in-production-32b', 'utf-8');
     
-    const [ivHex, encrypted] = encryptedToken.split(':');
+    const encryptionKey = process.env.ENCRYPTION_KEY;
+    if (!encryptionKey || encryptionKey.length !== 64) {
+      throw new Error('ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');
+    }
+    
+    const key = Buffer.from(encryptionKey, 'hex');
+    const [ivHex, authTagHex, encrypted] = encryptedToken.split(':');
+    
+    if (!ivHex || !authTagHex || !encrypted) {
+      throw new Error('Invalid encrypted token format');
+    }
+    
     const iv = Buffer.from(ivHex, 'hex');
+    const authTag = Buffer.from(authTagHex, 'hex');
     
-    const decipher = crypto.createDecipher(algorithm, key);
+    const decipher = crypto.createDecipherGCM(algorithm, key, iv);
+    decipher.setAuthTag(authTag);
+    
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     
